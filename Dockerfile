@@ -1,45 +1,70 @@
+# Multi-stage build for production
+FROM python:3.11-slim as builder
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Install system dependencies
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        gcc \
+        python3-dev \
+        libpq-dev \
+        build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create and activate virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Production stage
 FROM python:3.11-slim
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Set work directory
-WORKDIR /app
-
-# Install system dependencies
+# Install runtime dependencies
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         postgresql-client \
-        gcc \
-        python3-dev \
-        musl-dev \
-        libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
+        netcat-traditional \
+        curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
-# Install Python dependencies
-COPY requirements.txt /app/
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy virtual environment from builder stage
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Set work directory
+WORKDIR /app
 
 # Copy project
 COPY . /app/
 
-# Install netcat for health checks
-RUN apt-get update && apt-get install -y netcat-traditional && rm -rf /var/lib/apt/lists/*
+# Create necessary directories
+RUN mkdir -p /app/staticfiles /app/media /app/logs
 
-# Create staticfiles and media directories
-RUN mkdir -p /app/staticfiles /app/media
+# Make scripts executable
+RUN chmod +x /app/docker-entrypoint.prod.sh
 
-# Make entrypoint script executable
-RUN chmod +x /app/docker-entrypoint.sh
-
-# Create a non-root user
-RUN adduser --disabled-password --gecos '' appuser
-RUN chown -R appuser:appuser /app
+# Create non-root user
+RUN adduser --disabled-password --gecos '' appuser \
+    && chown -R appuser:appuser /app
 USER appuser
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8000/admin/ || exit 1
 
 # Expose port
 EXPOSE 8000
 
-# Use entrypoint script
-ENTRYPOINT ["/app/docker-entrypoint.sh"]
+# Use production entrypoint
+ENTRYPOINT ["/app/docker-entrypoint.prod.sh"]
