@@ -23,11 +23,11 @@ services:
   web:
     build: 
       context: .
-      dockerfile: Dockerfile.prod
+      dockerfile: Dockerfile
     container_name: survey360_web_prod
     restart: always
     env_file:
-      - .env.production
+      - .env
     volumes:
       - static_volume_prod:/app/staticfiles
       - media_volume_prod:/app/media

@@ -52,7 +52,7 @@ COPY . /app/
 RUN mkdir -p /app/staticfiles /app/media /app/logs
 
 # Make scripts executable
-RUN chmod +x /app/docker-entrypoint.prod.sh
+RUN chmod +x /app/docker-entrypoint.sh
 
 # Create non-root user
 RUN adduser --disabled-password --gecos '' appuser \
@@ -67,4 +67,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 EXPOSE 8000
 
 # Use production entrypoint
-ENTRYPOINT ["/app/docker-entrypoint.prod.sh"]
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
