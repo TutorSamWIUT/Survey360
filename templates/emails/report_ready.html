@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Leadership Assessment Report is Ready</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .greeting {
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 20px;
+        }
+        .message {
+            background: #f8f9fa;
+            border-left: 4px solid #764ba2;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 5px;
+        }
+        .message p {
+            margin: 10px 0;
+            color: #666;
+        }
+        .button-container {
+            text-align: center;
+            margin: 35px 0;
+        }
+        .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white !important;
+            padding: 15px 40px;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 16px;
+            box-shadow: 0 4px 15px rgba(118, 75, 162, 0.3);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(118, 75, 162, 0.4);
+        }
+        .info-box {
+            background: #fff8e1;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 25px 0;
+        }
+        .info-box h3 {
+            color: #f57c00;
+            margin-top: 0;
+            font-size: 16px;
+        }
+        .info-box p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .footer {
+            background: #f8f9fa;
+            padding: 25px;
+            text-align: center;
+            border-top: 1px solid #e0e0e0;
+        }
+        .footer p {
+            color: #888;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        .footer a {
+            color: #764ba2;
+            text-decoration: none;
+        }
+        .icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        .highlight {
+            color: #764ba2;
+            font-weight: 600;
+        }
+        @media only screen and (max-width: 600px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+            .content {
+                padding: 25px 20px;
+            }
+            .button {
+                padding: 12px 30px;
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon">📊</div>
+            <h1>Your Leadership Assessment Report is Ready!</h1>
+        </div>
+        
+        <div class="content">
+            <p class="greeting">Dear {{ leader_name }},</p>
+            
+            <div class="message">
+                <p><strong>Great news!</strong> Your comprehensive 360-degree leadership assessment report has been generated and is now available for review.</p>
+                <p>This report includes valuable feedback from your colleagues and provides insights into your leadership strengths and areas for growth.</p>
+            </div>
+            
+            <div class="info-box">
+                <h3>📋 Report Details</h3>
+                <p><strong>Survey Title:</strong> {{ survey_title }}</p>
+                <p><strong>Total Responses:</strong> Comprehensive feedback from multiple perspectives</p>
+                <p><strong>Report Type:</strong> 360-Degree Leadership Assessment</p>
+            </div>
+            
+            <div class="button-container">
+                <a href="{{ report_url }}" class="button">View Your Report</a>
+            </div>
+            
+            <p style="color: #666; font-size: 15px; line-height: 1.8;">
+                The report provides a detailed analysis of your leadership competencies across multiple dimensions. 
+                Use these insights to continue building on your strengths and identify opportunities for professional development.
+            </p>
+            
+            <p style="color: #888; font-size: 14px; margin-top: 30px;">
+                <em>Note: This link will remain active for your reference. You can access your report at any time.</em>
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Principal360 Leadership Assessment</strong></p>
+            <p>This is an automated message. Please do not reply to this email.</p>
+            <p>For assistance, contact your survey administrator.</p>
+        </div>
+    </div>
+</body>
+</html>

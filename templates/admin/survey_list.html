@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}Surveys - Principal360 Admin{% endblock %}
+
+{% block page_title %}Surveys{% endblock %}
+
+{% block nav_items %}
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'admin_dashboard' %}">
+        <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link active" href="{% url 'survey_list' %}">
+        <i class="fas fa-list me-2"></i> Surveys
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'create_survey' %}">
+        <i class="fas fa-plus-circle me-2"></i> New Survey
+    </a>
+</li>
+{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'create_survey' %}" class="btn btn-success">
+    <i class="fas fa-plus-circle me-2"></i> New Survey
+</a>
+{% endblock %}
+
+{% block content %}
+<div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>All Surveys</h1>
+        <a href="{% url 'create_survey' %}" class="btn btn-primary">
+            <i class="fas fa-plus-circle me-2"></i> Create New Survey
+        </a>
+    </div>
+    
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Status Filter</label>
+                    <select name="status" class="form-select" onchange="this.form.submit()">
+                        <option value="">All Surveys</option>
+                        <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                        <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending Self-Assessment</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Search</label>
+                    <input type="text" name="search" class="form-control" placeholder="Search by leader name or email...">
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-search me-2"></i> Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Surveys Table -->
+    <div class="card">
+        <div class="card-body">
+            {% if surveys %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Leader Name</th>
+                            <th>Email</th>
+                            <th>Created</th>
+                            <th>Status</th>
+                            <th>Responses</th>
+                            <th>Invitations</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for survey in surveys %}
+                        <tr>
+                            <td>#{{ survey.id }}</td>
+                            <td>{{ survey.leader_name }}</td>
+                            <td>{{ survey.leader_email }}</td>
+                            <td>{{ survey.created_at|date:"M d, Y" }}</td>
+                            <td>
+                                {% if not survey.leader_completed_self %}
+                                <span class="badge bg-warning">Pending Self</span>
+                                {% elif survey.get_total_response_count < 5 %}
+                                <span class="badge bg-info">Collecting</span>
+                                {% else %}
+                                <span class="badge bg-success">Ready</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ survey.get_total_response_count }}</td>
+                            <td>{{ survey.invitations.count }}</td>
+                            <td>
+                                <a href="{% url 'survey_detail' survey.id %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                                <a href="{% url 'generate_report' survey.id %}" class="btn btn-sm btn-outline-success">
+                                    <i class="fas fa-file-alt"></i> Report
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted text-center py-4">No surveys found. <a href="{% url 'create_survey' %}">Create your first survey</a></p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

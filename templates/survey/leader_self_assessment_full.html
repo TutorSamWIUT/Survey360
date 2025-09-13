@@ -1,0 +1,1333 @@
+{% load survey_extras %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leadership Self-Assessment - {{ survey.leader_name }}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Google Forms Style -->
+    <style>
+        body {
+            background-color: #f0ebf8;
+            font-family: 'Google Sans', Roboto, Arial, sans-serif;
+        }
+        
+        /* Remove all dashed borders from form elements */
+        input, select, textarea, fieldset {
+            border-style: solid !important;
+        }
+        
+        /* Hide any default form styling that might show dashes */
+        .form-control, .form-check-input {
+            border-style: solid !important;
+        }
+        
+        .form-container {
+            max-width: 800px;
+            margin: 20px auto;
+        }
+        
+        .form-header {
+            background: #673ab7;
+            color: white;
+            border-radius: 8px 8px 0 0;
+            padding: 24px;
+            margin-bottom: 0;
+        }
+        
+        .form-header h1 {
+            font-size: 32px;
+            font-weight: 400;
+            margin: 0;
+        }
+        
+        .form-description {
+            background: white;
+            padding: 24px;
+            border-left: 4px solid #673ab7;
+            margin-bottom: 16px;
+            border-radius: 8px;
+        }
+        
+        .question-card {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            transition: border 0.3s ease;
+        }
+        
+        .question-card.error {
+            border: 2px solid #d93025;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1), 0 0 0 3px rgba(217, 48, 37, 0.1);
+        }
+        
+        .error-message {
+            color: #d93025;
+            font-size: 14px;
+            margin-top: 8px;
+            display: none;
+        }
+        
+        .question-number {
+            color: #673ab7;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .question-text {
+            font-size: 16px;
+            margin-bottom: 16px;
+            color: #202124;
+        }
+        
+        .required-mark {
+            color: #d93025;
+            margin-left: 4px;
+        }
+        
+        .likert-scale {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .likert-option {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .likert-option:hover {
+            background: #f8f9fa;
+            margin: 0 -12px;
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+        
+        .likert-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            accent-color: #673ab7;
+            border: none;
+            outline: none;
+        }
+        
+        .relationship-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 8px 0;
+        }
+        
+        .radio-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            accent-color: #673ab7;
+        }
+        
+        .strength-grid,
+        .opportunity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+        
+        .checkbox-option {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        
+        .checkbox-option:hover {
+            background: #f8f9fa;
+        }
+        
+        .checkbox-option input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            margin-top: 2px;
+            accent-color: #673ab7;
+        }
+        
+        .ranking-section {
+            margin-top: 24px;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .rank-select {
+            width: 60px;
+            padding: 4px 8px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            margin-right: 12px;
+        }
+        
+        .open-response {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            font-size: 14px;
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+        
+        .open-response:focus {
+            outline: none;
+            border-color: #673ab7;
+            box-shadow: 0 0 0 2px rgba(103, 58, 183, 0.1);
+        }
+        
+        .submit-section {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-top: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .submit-btn {
+            background: #673ab7;
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .submit-btn:hover {
+            background: #5e35b1;
+        }
+        
+        .progress-indicator {
+            background: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .progress-bar-custom {
+            height: 8px;
+            background: #e8eaf6;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #673ab7;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .error-message {
+            color: #d93025;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <!-- Form Header -->
+        <div class="form-header">
+            <h1>Leadership Self-Assessment</h1>
+        </div>
+        
+        <!-- Form Description -->
+        <div class="form-description">
+            <h2 style="font-size: 20px; margin-bottom: 12px;">Self-Assessment for {{ survey.leader_name }}</h2>
+            <p style="margin-bottom: 8px;">Please reflect honestly on your leadership practices.</p>
+            <p style="margin-bottom: 0; color: #5f6368;">Estimated time: 20-30 minutes</p>
+        </div>
+        
+        <!-- Progress Indicator -->
+        <div class="progress-indicator">
+            <div class="d-flex justify-content-between mb-2">
+                <span>Progress</span>
+                <span id="progress-text">0%</span>
+            </div>
+            <div class="progress-bar-custom">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+        
+        <form method="post" id="survey-form">
+            {% csrf_token %}
+            
+            <!-- Questions 2-55: Likert Scale -->
+            <!-- Question 2 -->
+            <div class="question-card" data-question="2">
+                <div class="question-number">Question 2 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q2_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q2_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q2_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 3 -->
+            <div class="question-card" data-question="3">
+                <div class="question-number">Question 3 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q3_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q3_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q3_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 4 -->
+            <div class="question-card" data-question="4">
+                <div class="question-number">Question 4 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q4_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q4_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q4_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 5 -->
+            <div class="question-card" data-question="5">
+                <div class="question-number">Question 5 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q5_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q5_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q5_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 6 -->
+            <div class="question-card" data-question="6">
+                <div class="question-number">Question 6 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q6_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q6_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q6_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 7 -->
+            <div class="question-card" data-question="7">
+                <div class="question-number">Question 7 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q7_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q7_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q7_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 8 -->
+            <div class="question-card" data-question="8">
+                <div class="question-number">Question 8 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q8_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q8_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q8_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 9 -->
+            <div class="question-card" data-question="9">
+                <div class="question-number">Question 9 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q9_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q9_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q9_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 10 -->
+            <div class="question-card" data-question="10">
+                <div class="question-number">Question 10 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q10_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q10_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q10_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 11 -->
+            <div class="question-card" data-question="11">
+                <div class="question-number">Question 11 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q11_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q11_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q11_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 12 -->
+            <div class="question-card" data-question="12">
+                <div class="question-number">Question 12 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q12_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q12_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q12_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 13 -->
+            <div class="question-card" data-question="13">
+                <div class="question-number">Question 13 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q13_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q13_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q13_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 14 -->
+            <div class="question-card" data-question="14">
+                <div class="question-number">Question 14 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q14_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q14_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q14_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 15 -->
+            <div class="question-card" data-question="15">
+                <div class="question-number">Question 15 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q15_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q15_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q15_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 16 -->
+            <div class="question-card" data-question="16">
+                <div class="question-number">Question 16 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q16_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q16_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q16_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 17 -->
+            <div class="question-card" data-question="17">
+                <div class="question-number">Question 17 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q17_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q17_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q17_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 18 -->
+            <div class="question-card" data-question="18">
+                <div class="question-number">Question 18 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q18_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q18_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q18_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 19 -->
+            <div class="question-card" data-question="19">
+                <div class="question-number">Question 19 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q19_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q19_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q19_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 20 -->
+            <div class="question-card" data-question="20">
+                <div class="question-number">Question 20 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q20_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q20_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q20_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 21 -->
+            <div class="question-card" data-question="21">
+                <div class="question-number">Question 21 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q21_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q21_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q21_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 22 -->
+            <div class="question-card" data-question="22">
+                <div class="question-number">Question 22 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q22_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q22_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q22_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 23 -->
+            <div class="question-card" data-question="23">
+                <div class="question-number">Question 23 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q23_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q23_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q23_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 24 -->
+            <div class="question-card" data-question="24">
+                <div class="question-number">Question 24 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q24_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q24_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q24_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 25 -->
+            <div class="question-card" data-question="25">
+                <div class="question-number">Question 25 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q25_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q25_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q25_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 26 -->
+            <div class="question-card" data-question="26">
+                <div class="question-number">Question 26 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q26_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q26_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q26_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 27 -->
+            <div class="question-card" data-question="27">
+                <div class="question-number">Question 27 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q27_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q27_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q27_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 28 -->
+            <div class="question-card" data-question="28">
+                <div class="question-number">Question 28 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q28_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q28_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q28_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 29 -->
+            <div class="question-card" data-question="29">
+                <div class="question-number">Question 29 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q29_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q29_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q29_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 30 -->
+            <div class="question-card" data-question="30">
+                <div class="question-number">Question 30 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q30_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q30_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q30_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 31 -->
+            <div class="question-card" data-question="31">
+                <div class="question-number">Question 31 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q31_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q31_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q31_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 32 -->
+            <div class="question-card" data-question="32">
+                <div class="question-number">Question 32 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q32_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q32_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q32_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 33 -->
+            <div class="question-card" data-question="33">
+                <div class="question-number">Question 33 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q33_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q33_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q33_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 34 -->
+            <div class="question-card" data-question="34">
+                <div class="question-number">Question 34 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q34_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q34_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q34_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 35 -->
+            <div class="question-card" data-question="35">
+                <div class="question-number">Question 35 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q35_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q35_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q35_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 36 -->
+            <div class="question-card" data-question="36">
+                <div class="question-number">Question 36 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q36_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q36_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q36_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 37 -->
+            <div class="question-card" data-question="37">
+                <div class="question-number">Question 37 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q37_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q37_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q37_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 38 -->
+            <div class="question-card" data-question="38">
+                <div class="question-number">Question 38 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q38_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q38_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q38_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 39 -->
+            <div class="question-card" data-question="39">
+                <div class="question-number">Question 39 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q39_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q39_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q39_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 40 -->
+            <div class="question-card" data-question="40">
+                <div class="question-number">Question 40 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q40_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q40_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q40_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 41 -->
+            <div class="question-card" data-question="41">
+                <div class="question-number">Question 41 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q41_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q41_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q41_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 42 -->
+            <div class="question-card" data-question="42">
+                <div class="question-number">Question 42 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q42_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q42_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q42_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 43 -->
+            <div class="question-card" data-question="43">
+                <div class="question-number">Question 43 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q43_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q43_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q43_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 44 -->
+            <div class="question-card" data-question="44">
+                <div class="question-number">Question 44 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q44_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q44_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q44_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 45 -->
+            <div class="question-card" data-question="45">
+                <div class="question-number">Question 45 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q45_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q45_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q45_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 46 -->
+            <div class="question-card" data-question="46">
+                <div class="question-number">Question 46 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q46_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q46_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q46_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 47 -->
+            <div class="question-card" data-question="47">
+                <div class="question-number">Question 47 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q47_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q47_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q47_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 48 -->
+            <div class="question-card" data-question="48">
+                <div class="question-number">Question 48 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q48_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q48_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q48_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 49 -->
+            <div class="question-card" data-question="49">
+                <div class="question-number">Question 49 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q49_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q49_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q49_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 50 -->
+            <div class="question-card" data-question="50">
+                <div class="question-number">Question 50 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q50_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q50_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q50_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 51 -->
+            <div class="question-card" data-question="51">
+                <div class="question-number">Question 51 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q51_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q51_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q51_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 52 -->
+            <div class="question-card" data-question="52">
+                <div class="question-number">Question 52 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q52_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q52_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q52_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 53 -->
+            <div class="question-card" data-question="53">
+                <div class="question-number">Question 53 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q53_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q53_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q53_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 54 -->
+            <div class="question-card" data-question="54">
+                <div class="question-number">Question 54 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q54_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q54_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q54_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 55 -->
+            <div class="question-card" data-question="55">
+                <div class="question-number">Question 55 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q55_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q55_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q55_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 56: Strengths Ranking -->
+            <div class="question-card" data-question="56">
+                <div class="question-number">Question 56 <span class="required-mark">*</span></div>
+                <div class="question-text">Select and rank the top 5 strengths of this leader (5 = highest strength)</div>
+                <div class="strength-grid" id="strength-grid">
+                    {% for value, label in form.strengths.field.choices %}
+                    <label class="checkbox-option">
+                        <input type="checkbox" name="strengths" value="{{ value }}" class="strength-checkbox">
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                <div class="ranking-section" id="strength-ranking" style="display: none;">
+                    <h6>Rank your selected strengths:</h6>
+                    <div id="strength-rank-list"></div>
+                </div>
+            </div>
+            
+            <!-- Question 57: Opportunities Ranking -->
+            <div class="question-card" data-question="57">
+                <div class="question-number">Question 57 <span class="required-mark">*</span></div>
+                <div class="question-text">Select and rank the top 5 opportunities for improvement (5 = highest priority)</div>
+                <div class="opportunity-grid" id="opportunity-grid">
+                    {% for value, label in form.opportunities.field.choices %}
+                    <label class="checkbox-option">
+                        <input type="checkbox" name="opportunities" value="{{ value }}" class="opportunity-checkbox">
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                <div class="ranking-section" id="opportunity-ranking" style="display: none;">
+                    <h6>Rank your selected opportunities:</h6>
+                    <div id="opportunity-rank-list"></div>
+                </div>
+            </div>
+            
+            <!-- Open-ended Questions -->
+            <div class="question-card" data-question="58">
+                <div class="question-number">Question 58</div>
+                <div class="question-text">What positive behaviors should this leader CONTINUE doing?</div>
+                <textarea name="continue_doing" class="open-response" rows="4" 
+                          placeholder="Your response..."></textarea>
+            </div>
+            
+            <div class="question-card" data-question="59">
+                <div class="question-number">Question 59</div>
+                <div class="question-text">What behaviors should this leader STOP doing?</div>
+                <textarea name="stop_doing" class="open-response" rows="4" 
+                          placeholder="Your response..."></textarea>
+            </div>
+            
+            <div class="question-card" data-question="60">
+                <div class="question-number">Question 60</div>
+                <div class="question-text">What new behaviors should this leader START doing?</div>
+                <textarea name="start_doing" class="open-response" rows="4" 
+                          placeholder="Your response..."></textarea>
+            </div>
+            
+            <!-- Submit Section -->
+            <div class="submit-section">
+                <span style="color: #5f6368;">Complete your self-assessment</span>
+                <button type="submit" class="submit-btn">Submit Self-Assessment</button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Progress tracking
+            function updateProgress() {
+                const totalQuestions = 60;
+                let answeredQuestions = 0;
+                
+                // Count answered radio questions
+                $('.question-card').each(function() {
+                    if ($(this).find('input[type="radio"]:checked').length > 0) {
+                        answeredQuestions++;
+                    }
+                });
+                
+                // Check rankings
+                if ($('.strength-checkbox:checked').length === 5) answeredQuestions++;
+                if ($('.opportunity-checkbox:checked').length === 5) answeredQuestions++;
+                
+                // Check open-ended (optional, so always count as answered)
+                answeredQuestions += 3;
+                
+                const progress = Math.round((answeredQuestions / totalQuestions) * 100);
+                $('#progress-text').text(progress + '%');
+                $('#progress-fill').css('width', progress + '%');
+            }
+            
+            // Update progress on any input change
+            $('input').on('change', updateProgress);
+            $('textarea').on('input', updateProgress);
+            
+            // Handle strength selection
+            $('.strength-checkbox').on('change', function() {
+                const checked = $('.strength-checkbox:checked');
+                if (checked.length > 5) {
+                    this.checked = false;
+                    alert('Please select exactly 5 strengths');
+                    return;
+                }
+                
+                if (checked.length === 5) {
+                    $('#strength-ranking').show();
+                    $('#strength-rank-list').empty();
+                    
+                    checked.each(function() {
+                        const value = $(this).val();
+                        const label = $(this).next('span').text();
+                        const rankHtml = `
+                            <div class="mb-2">
+                                <select name="strength_rank_${value}" class="rank-select" required>
+                                    <option value="">Rank</option>
+                                    <option value="5">5 (Highest)</option>
+                                    <option value="4">4</option>
+                                    <option value="3">3</option>
+                                    <option value="2">2</option>
+                                    <option value="1">1 (Lowest)</option>
+                                </select>
+                                <span>${label}</span>
+                            </div>
+                        `;
+                        $('#strength-rank-list').append(rankHtml);
+                    });
+                } else {
+                    $('#strength-ranking').hide();
+                }
+                updateProgress();
+            });
+            
+            // Handle opportunity selection
+            $('.opportunity-checkbox').on('change', function() {
+                const checked = $('.opportunity-checkbox:checked');
+                if (checked.length > 5) {
+                    this.checked = false;
+                    alert('Please select exactly 5 opportunities');
+                    return;
+                }
+                
+                if (checked.length === 5) {
+                    $('#opportunity-ranking').show();
+                    $('#opportunity-rank-list').empty();
+                    
+                    checked.each(function() {
+                        const value = $(this).val();
+                        const label = $(this).next('span').text();
+                        const rankHtml = `
+                            <div class="mb-2">
+                                <select name="opportunity_rank_${value}" class="rank-select" required>
+                                    <option value="">Rank</option>
+                                    <option value="5">5 (Highest Priority)</option>
+                                    <option value="4">4</option>
+                                    <option value="3">3</option>
+                                    <option value="2">2</option>
+                                    <option value="1">1 (Lowest Priority)</option>
+                                </select>
+                                <span>${label}</span>
+                            </div>
+                        `;
+                        $('#opportunity-rank-list').append(rankHtml);
+                    });
+                } else {
+                    $('#opportunity-ranking').hide();
+                }
+                updateProgress();
+            });
+            
+            // Form validation
+            $('#survey-form').on('submit', function(e) {
+                // Clear previous errors
+                $('.question-card').removeClass('error');
+                $('.error-message').hide();
+                
+                let isValid = true;
+                let firstError = null;
+                let errorMessages = [];
+                
+                // Check radio questions (2-55 for self-assessment, no relationship question)
+                for (let i = 2; i <= 55; i++) {
+                    const fieldName = `q${i}_response`;
+                    const questionCard = $(`.question-card[data-question="${i}"]`);
+                    
+                    if ($(`input[name="${fieldName}"]:checked`).length === 0) {
+                        isValid = false;
+                        questionCard.addClass('error');
+                        
+                        // Add error message
+                        if (questionCard.find('.error-message').length === 0) {
+                            questionCard.append('<div class="error-message">This question is required</div>');
+                        }
+                        questionCard.find('.error-message').show();
+                        
+                        if (!firstError) firstError = questionCard;
+                        errorMessages.push(`Question ${i}`);
+                    }
+                }
+                
+                // Check strength rankings
+                const strengthCard = $(`.question-card[data-question="56"]`);
+                if ($('.strength-checkbox:checked').length !== 5) {
+                    isValid = false;
+                    strengthCard.addClass('error');
+                    
+                    if (strengthCard.find('.error-message').length === 0) {
+                        strengthCard.append('<div class="error-message">Please select exactly 5 strengths</div>');
+                    }
+                    strengthCard.find('.error-message').show();
+                    
+                    if (!firstError) firstError = strengthCard;
+                    errorMessages.push('Question 56 (Strengths)');
+                }
+                
+                // Check opportunity rankings  
+                const opportunityCard = $(`.question-card[data-question="57"]`);
+                if ($('.opportunity-checkbox:checked').length !== 5) {
+                    isValid = false;
+                    opportunityCard.addClass('error');
+                    
+                    if (opportunityCard.find('.error-message').length === 0) {
+                        opportunityCard.append('<div class="error-message">Please select exactly 5 opportunities</div>');
+                    }
+                    opportunityCard.find('.error-message').show();
+                    
+                    if (!firstError) firstError = opportunityCard;
+                    errorMessages.push('Question 57 (Opportunities)');
+                }
+                
+                // Check ranking selects if they exist
+                if ($('.strength-checkbox:checked').length === 5) {
+                    $('.rank-select[name^="strength_rank_"]').each(function() {
+                        if ($(this).val() === '') {
+                            isValid = false;
+                            $(this).addClass('error');
+                            if (!firstError) firstError = strengthCard;
+                        }
+                    });
+                }
+                
+                if ($('.opportunity-checkbox:checked').length === 5) {
+                    $('.rank-select[name^="opportunity_rank_"]').each(function() {
+                        if ($(this).val() === '') {
+                            isValid = false;
+                            $(this).addClass('error');
+                            if (!firstError) firstError = opportunityCard;
+                        }
+                    });
+                }
+                
+                if (!isValid) {
+                    e.preventDefault();
+                    
+                    // Show detailed error message
+                    let errorMsg = 'Please complete the following required questions:\\n\\n';
+                    errorMsg += errorMessages.slice(0, 5).join('\\n');
+                    if (errorMessages.length > 5) {
+                        errorMsg += `\\n... and ${errorMessages.length - 5} more questions`;
+                    }
+                    
+                    alert(errorMsg);
+                    
+                    // Scroll to first error
+                    if (firstError) {
+                        $('html, body').animate({
+                            scrollTop: firstError.offset().top - 100
+                        }, 500);
+                    }
+                }
+            });
+            
+            // Clear error when user answers
+            $('input[type="radio"]').on('change', function() {
+                $(this).closest('.question-card').removeClass('error').find('.error-message').hide();
+            });
+            
+            $('.strength-checkbox, .opportunity-checkbox').on('change', function() {
+                $(this).closest('.question-card').removeClass('error').find('.error-message').hide();
+            });
+            
+            // Initialize progress
+            updateProgress();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,369 @@
+{% load survey_extras %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leadership Self-Assessment - {{ survey.leader_name }}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Google Forms Style -->
+    <style>
+        body {
+            background-color: #f0ebf8;
+            font-family: 'Google Sans', Roboto, Arial, sans-serif;
+        }
+        
+        .form-container {
+            max-width: 800px;
+            margin: 20px auto;
+        }
+        
+        .form-header {
+            background: #673ab7;
+            color: white;
+            border-radius: 8px 8px 0 0;
+            padding: 24px;
+            margin-bottom: 0;
+        }
+        
+        .form-header h1 {
+            font-size: 32px;
+            font-weight: 400;
+            margin: 0;
+        }
+        
+        .form-description {
+            background: white;
+            padding: 24px;
+            border-left: 4px solid #673ab7;
+            margin-bottom: 16px;
+            border-radius: 8px;
+        }
+        
+        .question-card {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .question-number {
+            color: #673ab7;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .question-text {
+            font-size: 16px;
+            margin-bottom: 16px;
+            color: #202124;
+        }
+        
+        .required-mark {
+            color: #d93025;
+            margin-left: 4px;
+        }
+        
+        .likert-scale {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .likert-option {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .likert-option:hover {
+            background: #f8f9fa;
+            margin: 0 -12px;
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+        
+        .likert-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            accent-color: #673ab7;
+        }
+        
+        .strength-grid,
+        .opportunity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+        
+        .checkbox-option {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        
+        .checkbox-option:hover {
+            background: #f8f9fa;
+        }
+        
+        .checkbox-option input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            margin-top: 2px;
+            accent-color: #673ab7;
+        }
+        
+        .ranking-section {
+            margin-top: 24px;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .rank-select {
+            width: 60px;
+            padding: 4px 8px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            margin-right: 12px;
+        }
+        
+        .open-response {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            font-size: 14px;
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+        
+        .open-response:focus {
+            outline: none;
+            border-color: #673ab7;
+            box-shadow: 0 0 0 2px rgba(103, 58, 183, 0.1);
+        }
+        
+        .submit-section {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-top: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .submit-btn {
+            background: #673ab7;
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .submit-btn:hover {
+            background: #5e35b1;
+        }
+        
+        .progress-indicator {
+            background: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .progress-bar-custom {
+            height: 8px;
+            background: #e8eaf6;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #673ab7;
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <!-- Form Header -->
+        <div class="form-header">
+            <h1>Leadership Self-Assessment</h1>
+        </div>
+        
+        <!-- Form Description -->
+        <div class="form-description">
+            <h2 style="font-size: 20px; margin-bottom: 12px;">Self-Assessment for {{ survey.leader_name }}</h2>
+            <p style="margin-bottom: 8px;">Please reflect honestly on your leadership practices.</p>
+            <p style="margin-bottom: 0; color: #5f6368;">Estimated time: 20-30 minutes</p>
+        </div>
+        
+        <!-- Progress Indicator -->
+        <div class="progress-indicator">
+            <div class="d-flex justify-content-between mb-2">
+                <span>Progress</span>
+                <span id="progress-text">0%</span>
+            </div>
+            <div class="progress-bar-custom">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+        
+        <form method="post" id="survey-form">
+            {% csrf_token %}
+            
+            <!-- Questions 2-55: Likert Scale -->
+            <!-- Question 2 -->
+            <div class="question-card" data-question="2">
+                <div class="question-number">Question 2 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q2_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q2_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q2_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 3 -->
+            <div class="question-card" data-question="3">
+                <div class="question-number">Question 3 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q3_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q3_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q3_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 4 -->
+            <div class="question-card" data-question="4">
+                <div class="question-number">Question 4 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q4_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q4_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q4_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 5 -->
+            <div class="question-card" data-question="5">
+                <div class="question-number">Question 5 <span class="required-mark">*</span></div>
+                <div class="question-text">{{ form.q5_response.label }}</div>
+                <div class="likert-scale">
+                    {% for value, label in form.q5_response.field.choices %}
+                    <label class="likert-option">
+                        <input type="radio" name="q5_response" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Question 56: Strengths Ranking -->
+            <div class="question-card" data-question="56">
+                <div class="question-number">Question 56 <span class="required-mark">*</span></div>
+                <div class="question-text">Select and rank your top 5 strengths (5 = highest strength)</div>
+                <div class="strength-grid" id="strength-grid">
+                    {% for value, label in form.strengths.field.choices %}
+                    <label class="checkbox-option">
+                        <input type="checkbox" name="strengths" value="{{ value }}" class="strength-checkbox">
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                <div class="ranking-section" id="strength-ranking" style="display: none;">
+                    <h6>Rank your selected strengths:</h6>
+                    <div id="strength-rank-list"></div>
+                </div>
+            </div>
+            
+            <!-- Question 57: Opportunities Ranking -->
+            <div class="question-card" data-question="57">
+                <div class="question-number">Question 57 <span class="required-mark">*</span></div>
+                <div class="question-text">Select and rank your top 5 opportunities for improvement (5 = highest priority)</div>
+                <div class="opportunity-grid" id="opportunity-grid">
+                    {% for value, label in form.opportunities.field.choices %}
+                    <label class="checkbox-option">
+                        <input type="checkbox" name="opportunities" value="{{ value }}" class="opportunity-checkbox">
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                <div class="ranking-section" id="opportunity-ranking" style="display: none;">
+                    <h6>Rank your selected opportunities:</h6>
+                    <div id="opportunity-rank-list"></div>
+                </div>
+            </div>
+            
+            <!-- Open-ended Questions -->
+            <div class="question-card" data-question="58">
+                <div class="question-number">Question 58</div>
+                <div class="question-text">What positive behaviors should you CONTINUE doing?</div>
+                <textarea name="continue_doing" class="open-response" rows="4" 
+                          placeholder="Your reflection..."></textarea>
+            </div>
+            
+            <div class="question-card" data-question="59">
+                <div class="question-number">Question 59</div>
+                <div class="question-text">What behaviors should you STOP doing?</div>
+                <textarea name="stop_doing" class="open-response" rows="4" 
+                          placeholder="Your reflection..."></textarea>
+            </div>
+            
+            <div class="question-card" data-question="60">
+                <div class="question-number">Question 60</div>
+                <div class="question-text">What new behaviors should you START doing?</div>
+                <textarea name="start_doing" class="open-response" rows="4" 
+                          placeholder="Your reflection..."></textarea>
+            </div>
+            
+            <!-- Submit Section -->
+            <div class="submit-section">
+                <span style="color: #5f6368;">Complete your self-assessment</span>
+                <button type="submit" class="submit-btn">Submit Self-Assessment</button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Progress tracking and form functionality
+            // (Copy the same JavaScript from participant_survey.html)
+        });
+    </script>
+</body>
+</html>

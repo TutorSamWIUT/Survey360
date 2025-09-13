@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Principal360 Leadership Impact Report - {{ survey.leader_name }}</title>
+    {% load survey_extras %}
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            .page-break { page-break-after: always; }
+            body { margin: 0; }
+            @page { 
+                size: landscape;
+                margin: 0.5in;
+            }
+        }
+        
+        body {
+            font-family: 'Times New Roman', serif;
+            background: white;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            line-height: 1.4;
+            width: 100%;
+            overflow-x: auto;
+        }
+        
+        .report-container {
+            width: 100%;
+            max-width: none;
+            margin: 0;
+            padding: 0;
+            background: white;
+        }
+        
+        /* Cover Page */
+        .cover-page {
+            height: 8.5in;
+            width: 11in;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border: 3px solid #666;
+            margin: 0.5in auto;
+            position: relative;
+            box-sizing: border-box;
+        }
+        
+        .leadership-remedy-header {
+            position: absolute;
+            top: 40px;
+            width: 100%;
+            color: #666;
+            font-size: 12px;
+            font-weight: normal;
+            letter-spacing: 1px;
+        }
+        
+        .principal360-title {
+            color: #8B2635;
+            font-size: 72px;
+            font-weight: bold;
+            margin: 20px 0;
+            font-family: 'Times New Roman', serif;
+        }
+        
+        .impact-report-subtitle {
+            color: #8B2635;
+            font-size: 36px;
+            margin-bottom: 100px;
+        }
+        
+        
+        .cover-footer {
+            background: #8B2635;
+            color: white;
+            padding: 30px;
+            width: 100%;
+            position: absolute;
+            bottom: 0;
+        }
+        
+        .cover-footer h2 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .cover-footer p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        
+        .leader-name {
+            color: #FFD700;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        /* Content Pages */
+        .content-page {
+            min-height: 8.5in;
+            width: 11in;
+            padding: 0.75in;
+            margin: 0 auto 20px auto;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            position: relative;
+        }
+        
+        .page-header {
+            text-align: right;
+            color: #8B2635;
+            font-size: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .section-header {
+            background: #8B2635;
+            color: white;
+            padding: 8px 15px;
+            margin: 20px 0 15px 0;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .page-number {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            font-size: 12px;
+            color: #333;
+        }
+        
+        /* Ensure proper alignment */
+        .row {
+            margin: 0;
+            width: 100%;
+        }
+        
+        .col-md-6 {
+            padding: 0 15px;
+        }
+        
+        h1, h2, h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .participant-list {
+            margin: 15px 0;
+        }
+        
+        .participant-list li {
+            margin: 5px 0;
+        }
+        
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 12px;
+        }
+        
+        .data-table th,
+        .data-table td {
+            border: 1px solid #333;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        .data-table th {
+            background: #8B2635;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .category-header {
+            background: #90EE90 !important;
+            color: #333 !important;
+            font-weight: bold;
+            text-align: center;
+            font-size: 12px;
+        }
+        
+        .score-table th {
+            background: #A8A8A8;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            padding: 12px 8px;
+        }
+        
+        .score-table td {
+            font-size: 12px;
+            padding: 10px 8px;
+            vertical-align: middle;
+        }
+        
+        .score-table tr {
+            min-height: 40px;
+        }
+        
+        /* Charts */
+        .chart-container {
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .percentile-table {
+            margin: 20px auto;
+            width: auto;
+            border-collapse: collapse;
+        }
+        
+        .percentile-table td {
+            border: 2px solid #333;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            min-width: 100px;
+        }
+        
+        /* Strengths and Opportunities */
+        .strength-score, .opportunity-score {
+            font-weight: bold;
+            text-align: center;
+            width: 60px;
+        }
+        
+        .model-diagram {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .model-diagram img {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        /* Comments section */
+        .comments-section {
+            margin: 20px 0;
+        }
+        
+        .comment-item {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        /* Action Planning */
+        .action-planning-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        .action-planning-table th,
+        .action-planning-table td {
+            border: 1px solid #333;
+            padding: 10px;
+            vertical-align: top;
+        }
+        
+        .action-planning-table th {
+            background: #f5f5f5;
+            font-weight: bold;
+        }
+        
+        /* Print button */
+        .print-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #8B2635;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+        
+        /* Additional alignment fixes */
+        .content-page .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0;
+        }
+        
+        .content-page .col-md-6 {
+            flex: 0 0 50%;
+            max-width: 50%;
+            padding: 0 15px;
+        }
+        
+        @media screen and (max-width: 1200px) {
+            .report-container {
+                padding: 10px;
+            }
+            
+            .cover-page, .content-page {
+                width: 100%;
+                max-width: 11in;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="print-btn no-print" onclick="window.print()">Print Report</button>
+    
+    <div class="report-container">
+        <!-- Cover Page -->
+        <div class="cover-page">
+            <div class="leadership-remedy-header">
+                LEADERSHIP REMEDY<br>
+                EMPOWERING LEADERS, TRANSFORMING SCHOOLS, SHAPING THE FUTURE
+            </div>
+            
+            
+            <div class="principal360-title">Principal360</div>
+            <div class="impact-report-subtitle">Leadership Impact Report</div>
+            
+            <div class="cover-footer">
+                <h2>LEADERSHIP REMEDY</h2>
+                <p>EMPOWERING LEADERS, TRANSFORMING SCHOOLS, SHAPING THE FUTURE</p>
+                <p class="leader-name">{{ survey.leader_name|upper }}</p>
+                <p class="leader-name">{{ report.generated_at|date:"F d, Y"|upper }}</p>
+            </div>
+        </div>
+        
+        <!-- Page 2: Overview -->
+        <div class="content-page">
+            <div class="page-header">{{ survey.leader_name }}</div>
+            
+            <div class="section-header">Overview</div>
+            
+            <p>Dear {{ survey.leader_name }},</p>
+            
+            <p>It is with great pride that we present you with your Principal360 Leadership Insights Report. A comprehensive document that is derived from various perspectives, including supervisors, staff, colleagues, and other stakeholders. This Principal360 report provides a practical view of your strengths and areas for development by gathering feedback from diverse perspectives. In turn, you are presented with an exceptional opportunity to enhance your leadership based on true-to-life information.</p>
+            
+            <p>This report celebrates your achievements and unique strengths while identifying growth opportunities. It serves as a roadmap for your professional development, helping you leverage your strengths and focus on areas for improvement to enhance your leadership effectiveness and success.</p>
+            
+            <p>We encourage you to approach this feedback with an open mind and a willingness to learn. Whether the feedback is positive or constructive, it is intended to support your growth and enhance your professional effectiveness. Embracing this feedback as an opportunity for self-reflection and improvement will pave the way for your personal, professional, and career development.</p>
+            
+            <p>Best regards,</p>
+            
+            <p><strong>Eddie Damian, Ed.D.</strong><br>
+            Leadership Remedy, CEO</p>
+            
+            <div class="page-number">1</div>
+        </div>
+        
+        <!-- Page 3: Report Summary -->
+        <div class="content-page">
+            <div class="page-header">{{ survey.leader_name }}</div>
+            
+            <div class="section-header">Report Summary</div>
+            
+            <p><strong>Leader Name:</strong> {{ survey.leader_name }}</p>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Participant Overview:</strong></p>
+                    <ul class="participant-list">
+                        <li>Supervisors...................................{{ supervisors_count }}</li>
+                        <li>Peers...........................................{{ peers_count }}</li>
+                        <li>Staff...........................................{{ staff_count }}</li>
+                        <li>Students.......................................{{ students_count }}</li>
+                        <li>Customers (Community/Parents/Students)......{{ community_count }}</li>
+                        <li>Self ...........................................1</li>
+                    </ul>
+                    
+                    <p><strong>Total number of participants, excluding self............{{ participant_count }}</strong></p>
+                    <p><strong>Leader Score: {{ overall_average }}</strong></p>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <canvas id="participantChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <p><strong>Percentile Rank:</strong></p>
+                <p>After conducting extensive research on the performance of numerous campus leaders, the following percentile cutoffs have been established. These percentiles are inclusive of all Principal360° reports within our system.</p>
+                
+                <table class="percentile-table">
+                    <tr>
+                        <td>10th Percentile<br>3.8</td>
+                        <td>25th Percentile<br>4.1</td>
+                        <td>50th Percentile<br>4.8</td>
+                        <td>75th Percentile<br>5.9</td>
+                        <td>90th Percentile<br>6.4</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="page-number">2</div>
+        </div>
+        
+        <!-- Page 4: Scoring System -->
+        <div class="content-page">
+            <div class="page-header">{{ survey.leader_name }}</div>
+            
+            <p><strong>Scoring:</strong> To ensure a structured and objective evaluation process, the following scoring system has been developed for the Principal360° report. Each category is rated on a scale of one to seven (1 to 7), with one (1) being the lowest and seven (7) being the highest rating. The scoring criteria are as follows:</p>
+            
+            <div style="margin: 20px 0;">
+                <p><span style="background: #90EE90; padding: 2px 5px;"><strong>7: Significantly above expectations</strong></span><br>
+                (Perfectly aligns with the individual's characteristics or performance in the given area, representing exceptional competence and outstanding performance.)</p>
+                
+                <p><span style="background: #90EE90; padding: 2px 5px;"><strong>6: Above expectations</strong></span><br>
+                (Strongly aligns with the individual's characteristics or performance in the given area, indicating high proficiency and effectiveness.)</p>
+                
+                <p><span style="background: #90EE90; padding: 2px 5px;"><strong>5: Somewhat above expectations</strong></span><br>
+                (Aligns reasonably well with the individual's characteristics or performance in the given area, reflecting solid competence).</p>
+                
+                <p><span style="background: #FFFF99; padding: 2px 5px;"><strong>4: Meets expectations</strong></span><br>
+                (Moderately aligns with the individual's characteristics or performance in the given area, but with some room for improvement.)</p>
+                
+                <p><span style="background: #FFB6C1; padding: 2px 5px;"><strong>3: Somewhat below expectations</strong></span><br>
+                (Somewhat aligns with the individual's characteristics or performance in the given area, but with notable gaps or inconsistencies.)</p>
+                
+                <p><span style="background: #FFB6C1; padding: 2px 5px;"><strong>2: Below expectations</strong></span><br>
+                (Minimally aligns with the individual's characteristics or performance in the given area.)</p>
+                
+                <p><span style="background: #FFB6C1; padding: 2px 5px;"><strong>1: Significantly below expectations</strong></span><br>
+                (Does not reflect the individual's characteristics or performance in the given area.)</p>
+            </div>
+            
+            <p>This quantitative scoring system represents your performance across various school-related criteria. It is essential to review the qualitative feedback provided, alongside the scores for a comprehensive understanding of your strengths and areas for improvement. Most importantly, this scoring system serves as a tool to facilitate meaningful discussions and reflections to support your growth and development as a professional.</p>
+            
+            <div class="page-number">3</div>
+        </div>
+        
+        <!-- Page 5: Campus Leader 360° Model -->
+        <div class="content-page">
+            <div class="page-header">{{ survey.leader_name }}</div>
+            
+            <div class="section-header">Campus Leader 360° Model</div>
+            
+            <p>The Principal360 is built upon extensive research, including national educational leadership standards that guide the work of all educators. This research serves as the framework and foundation for your report. All questions within this model are directly linked to one of the three key areas of campus leadership. The following model serves as a framework for campus leaders, offering a comprehensive approach to guide improvement using specific educational leadership dimensions.</p>
+            
+            <div class="model-diagram">
+                {% load static %}
+                <img src="{% static 'images/campus-leadership-360-model.png' %}" alt="Components of Campus Leadership 360" style="width: 100%; max-width: 800px; height: auto; margin: 0 auto; display: block;">
+            </div>
+            
+            <div class="page-number">4</div>
+        </div>
+        
+        <!-- Page 6: Model Description -->
+        <div class="content-page">
+            <div class="page-header">{{ survey.leader_name }}</div>
+            
+            <p><strong>Leading the Organization</strong> is comprised of four fundamental elements that contribute to effective leadership: visionary leadership, organizational culture, leadership development, and strategic planning. By excelling in these areas, leaders can effectively guide their campus toward success and create a thriving work environment that supports the growth and development of individuals and the organization.</p>
+            
+            <p><strong>Leading the Work</strong> encompasses five key components: communication, relationships, inspiration, courage, and equity. Leaders who excel in these areas create an inclusive and motivating work environment where individuals feel valued, empowered, and inspired to contribute their best.</p>
+            
+            <p><strong>Leading the People</strong> contains six key elements: instructional Leadership, pedagogy, feedback, school improvement, operations, and life-long learner. Leaders who excel in these areas create an environment that supports and empowers educators, fosters student success, and continuously strives for improvement in all aspects of the educational experience.</p>
+            
+            <p><strong>NOTES:</strong></p>
+            <div style="min-height: 400px; border: 1px solid #ccc; margin: 20px 0;"></div>
+            
+            <div class="page-number">5</div>
+        </div>
+        
+        <!-- Page 7: Strengths -->
+        <div class="content-page">
+            <div class="page-header">{{ survey.leader_name }}</div>
+            
+            <div class="section-header">Strengths</div>
+            
+            <p>Raters were requested to select the five most significant strengths from the provided list. Each strength was then assigned a weight, with the top strength receiving a weight of 5, the second strength receiving a 4, the third strength receiving a 3, the fourth strength receiving a 2, and the fifth strength receiving a 1. The score in the left column represents the sum of the scores assigned by the raters for each strength. If a strength is not listed, it means that no raters chose that particular item from the list. Leader self-scores are not included in the calculation process.</p>
+            
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th class="strength-score">Score</th>
+                        <th>Strengths</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for strength, avg_rank, count in top_strengths %}
+                    <tr>
+                        <td class="strength-score">{{ avg_rank|mul:count|floatformat:0 }}</td>
+                        <td style="text-align: left;">{{ strength }}</td>
+                    </tr>
+                    {% endfor %}
+                    
+                    <!-- Additional empty rows for all strengths not selected -->
+                    <tr>
+                        <td></td>
+                        <td style="text-align: left;">Supports teachers in implementing effective instructional strategies</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td style="text-align: left;">Ability to build positive relationships with others</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td style="text-align: left;">Supports collaboration among all school stakeholders</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td style="text-align: left;">Creates a positive school culture</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td style="text-align: left;">Promotes and encourages innovation</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td style="text-align: left;">Supports and encourages continuous improvement</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td style="text-align: left;">Makes timely decisions aligned with school mission and goals</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td style="text-align: left;">Decisions encompass the needs of all stakeholders</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td style="text-align: left;">Uses data to inform major decisions</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td style="text-align: left;">Effectively manages emotions</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td style="text-align: left;">Resilient in effectively navigating change</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td style="text-align: left;">Able to navigate challenges and obstacles</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="page-number">6</div>
+        </div>
+        
+        <!-- Page 8: More Strengths -->
+        <div class="content-page">
+            <div class="page-header">{{ survey.leader_name }}</div>
+            
+            <table class="data-table">
+                <tbody>
+                    <tr>
+                        <td></td>
+                        <td style="text-align: left;">Has a clear vision for the school</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td style="text-align: left;">Able to motivate others to work towards shared goals</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td style="text-align: left;">Maintains a high level of integrity</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td style="text-align: left;">Create a positive school environment</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td style="text-align: left;">Committed to learning and growing professionally</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td style="text-align: left;">Is up to date on the latest research and best practices</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <p><strong>NOTES:</strong></p>
+            <div style="min-height: 500px; border: 1px solid #ccc; margin: 20px 0;"></div>
+            
+            <div class="page-number">7</div>
+        </div>
+        
+        <!-- Page 9: Opportunities -->
+        <div class="content-page">
+            <div class="page-header">{{ survey.leader_name }}</div>
+            
+            <div class="section-header">Opportunities</div>
+            
+            <p>Raters were requested to select the five most significant opportunities for growth from the provided list. Each opportunity was then assigned a weight, with the top opportunity receiving a weight of 5, the second opportunity receiving a 4, the third opportunity receiving a 3, the fourth opportunity receiving a 2, and the fifth opportunity receiving a 1. The score in the left column represents the sum of the scores assigned by the raters for each opportunity. If an opportunity is not listed, it means that no raters chose that particular item from the list. Leader self-scores are not included in the calculation process.</p>
+            
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th class="opportunity-score">Score</th>
+                        <th>Opportunities</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for opportunity, avg_rank, count in top_opportunities %}
+                    <tr>
+                        <td class="opportunity-score">{{ avg_rank|mul:count|floatformat:0 }}</td>
+                        <td style="text-align: left;">{{ opportunity }}</td>
+                    </tr>
+                    {% endfor %}
+                    
+                    <!-- Additional opportunity items -->
+                    <tr>
+                        <td></td>
+                        <td style="text-align: left;">Leadership promotes a lack of trust among others</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td style="text-align: left;">Micromanages others</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td style="text-align: left;">Inhibits autonomy and creativity</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td style="text-align: left;">Struggles to create a positive school culture</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td style="text-align: left;">Does not effectively engage parents or the community</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td style="text-align: left;">Difficulty expressing ideas</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td style="text-align: left;">Lacks innovative problem-solving skills/Could improve their problem-solving skills.</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="page-number">8</div>
+        </div>
+        
+        <!-- Page 10: More Opportunities -->
+        <div class="content-page">
+            <div class="page-header">{{ survey.leader_name }}</div>
+            
+            <table class="data-table">
+                <tbody>
+                    <tr>
+                        <td>11</td>
+                        <td style="text-align: left;">Does not follow through</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td style="text-align: left;">Lacks appreciation for diverse perspectives</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td style="text-align: left;">Does not recognize others</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td style="text-align: left;">Someone I work for, not someone I work with.</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <p><strong>NOTES:</strong></p>
+            <div style="min-height: 600px; border: 1px solid #ccc; margin: 20px 0;"></div>
+            
+            <div class="page-number">9</div>
+        </div>
+        
+        <!-- Page 10-11: Leading the Organization (Combined) -->
+        <div class="content-page">
+            <div class="page-header">{{ survey.leader_name }}</div>
+            
+            <div class="section-header">Leading the Organization</div>
+            
+            <table class="score-table data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 40%;">Key Area & Related Questions</th>
+                        <th style="width: 8%;">Self</th>
+                        <th style="width: 8%;">Supervisors</th>
+                        <th style="width: 8%;">Staff</th>
+                        <th style="width: 8%;">Colleagues</th>
+                        <th style="width: 14%;">Stakeholders (Parents/Community)</th>
+                        <th style="width: 8%;">Students</th>
+                        <th style="width: 6%;">Average</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="category-header">
+                        <td colspan="8">Visionary (Strategic vision, core values, cultural responsiveness)</td>
+                    </tr>
+                    {% for q_num, stats in question_stats.items %}
+                        {% if q_num >= 2 and q_num <= 7 %}
+                        <tr>
+                            <td style="text-align: left;">{{ stats.text }}</td>
+                            <td>{{ stats.by_relationship.self|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.supervisor|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.teacher|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.peer|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.parent|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.student|default:"--" }}</td>
+                            <td>{{ stats.average }}</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <tr class="category-header">
+                        <td colspan="8">Culture (School culture, safety)</td>
+                    </tr>
+                    {% for q_num, stats in question_stats.items %}
+                        {% if q_num >= 8 and q_num <= 11 %}
+                        <tr>
+                            <td style="text-align: left;">{{ stats.text }}</td>
+                            <td>{{ stats.by_relationship.self|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.supervisor|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.teacher|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.peer|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.parent|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.student|default:"--" }}</td>
+                            <td>{{ stats.average }}</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <tr class="category-header">
+                        <td colspan="8">Growing Leaders (District knowledge)</td>
+                    </tr>
+                    {% for q_num, stats in question_stats.items %}
+                        {% if q_num >= 12 and q_num <= 14 %}
+                        <tr>
+                            <td style="text-align: left;">{{ stats.text }}</td>
+                            <td>{{ stats.by_relationship.self|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.supervisor|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.teacher|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.peer|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.parent|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.student|default:"--" }}</td>
+                            <td>{{ stats.average }}</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <tr class="category-header">
+                        <td colspan="8">Teaching and Learning (Professional development of staff)</td>
+                    </tr>
+                    {% for q_num, stats in question_stats.items %}
+                        {% if q_num >= 15 and q_num <= 17 %}
+                        <tr>
+                            <td style="text-align: left;">{{ stats.text }}</td>
+                            <td>{{ stats.by_relationship.self|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.supervisor|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.teacher|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.peer|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.parent|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.student|default:"--" }}</td>
+                            <td>{{ stats.average }}</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <div class="page-number">10</div>
+        </div>
+
+        <!-- Page 11-12: Leading the Work (Combined) -->
+        <div class="content-page">
+            <div class="page-header">{{ survey.leader_name }}</div>
+            
+            <div class="section-header">Leading the Work</div>
+            
+            <p>This resource denotes categories to consider when selecting equitable participants for stakeholder feedback.</p>
+            
+            <table class="score-table data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 40%;">Key Area & Related Questions</th>
+                        <th style="width: 8%;">Self</th>
+                        <th style="width: 8%;">Supervisors</th>
+                        <th style="width: 8%;">Staff</th>
+                        <th style="width: 8%;">Colleagues</th>
+                        <th style="width: 14%;">Stakeholders (Parents/Community)</th>
+                        <th style="width: 8%;">Students</th>
+                        <th style="width: 6%;">Average</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="category-header">
+                        <td colspan="8">Ethics (Professionalism, integrity, ethical behavior & leadership)</td>
+                    </tr>
+                    {% for q_num, stats in question_stats.items %}
+                        {% if q_num >= 18 and q_num <= 21 %}
+                        <tr>
+                            <td style="text-align: left;">{{ stats.text }}</td>
+                            <td>{{ stats.by_relationship.self|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.supervisor|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.teacher|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.peer|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.parent|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.student|default:"--" }}</td>
+                            <td>{{ stats.average }}</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <tr class="category-header">
+                        <td colspan="8">Communication (Internal communications)</td>
+                    </tr>
+                    {% for q_num, stats in question_stats.items %}
+                        {% if q_num >= 22 and q_num <= 24 %}
+                        <tr>
+                            <td style="text-align: left;">{{ stats.text }}</td>
+                            <td>{{ stats.by_relationship.self|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.supervisor|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.teacher|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.peer|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.parent|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.student|default:"--" }}</td>
+                            <td>{{ stats.average }}</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <tr class="category-header">
+                        <td colspan="8">Relationships (Relationship building, interpersonal skills)</td>
+                    </tr>
+                    {% for q_num, stats in question_stats.items %}
+                        {% if q_num >= 25 and q_num <= 28 %}
+                        <tr>
+                            <td style="text-align: left;">{{ stats.text }}</td>
+                            <td>{{ stats.by_relationship.self|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.supervisor|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.teacher|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.peer|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.parent|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.student|default:"--" }}</td>
+                            <td>{{ stats.average }}</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <tr class="category-header">
+                        <td colspan="8">Courageous (community care and support for students)</td>
+                    </tr>
+                    {% for q_num, stats in question_stats.items %}
+                        {% if q_num >= 29 and q_num <= 32 %}
+                        <tr>
+                            <td style="text-align: left;">{{ stats.text }}</td>
+                            <td>{{ stats.by_relationship.self|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.supervisor|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.teacher|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.peer|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.parent|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.student|default:"--" }}</td>
+                            <td>{{ stats.average }}</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <tr class="category-header">
+                        <td colspan="8">Equity (Inclusive efforts)</td>
+                    </tr>
+                    {% for q_num, stats in question_stats.items %}
+                        {% if q_num >= 33 and q_num <= 34 %}
+                        <tr>
+                            <td style="text-align: left;">{{ stats.text }}</td>
+                            <td>{{ stats.by_relationship.self|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.supervisor|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.teacher|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.peer|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.parent|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.student|default:"--" }}</td>
+                            <td>{{ stats.average }}</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <div class="page-number">11</div>
+        </div>
+
+        <!-- Page 12-14: Leading the People (Combined) -->
+        <div class="content-page">
+            <div class="page-header">{{ survey.leader_name }}</div>
+            
+            <div class="section-header">Leading the People</div>
+            
+            <p>This resource denotes categories to consider when selecting equitable participants for stakeholder feedback.</p>
+            
+            <table class="score-table data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 40%;">Key Area & Related Questions</th>
+                        <th style="width: 8%;">Self</th>
+                        <th style="width: 8%;">Supervisors</th>
+                        <th style="width: 8%;">Staff</th>
+                        <th style="width: 8%;">Colleagues</th>
+                        <th style="width: 14%;">Stakeholders (Parents/Community)</th>
+                        <th style="width: 8%;">Students</th>
+                        <th style="width: 6%;">Average</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="category-header">
+                        <td colspan="8">Instructional Leadership (Instruction, curriculum design)</td>
+                    </tr>
+                    {% for q_num, stats in question_stats.items %}
+                        {% if q_num >= 35 and q_num <= 39 %}
+                        <tr>
+                            <td style="text-align: left;">{{ stats.text }}</td>
+                            <td>{{ stats.by_relationship.self|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.supervisor|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.teacher|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.peer|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.parent|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.student|default:"--" }}</td>
+                            <td>{{ stats.average }}</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <tr class="category-header">
+                        <td colspan="8">Feedback (Support of teachers)</td>
+                    </tr>
+                    {% for q_num, stats in question_stats.items %}
+                        {% if q_num >= 40 and q_num <= 42 %}
+                        <tr>
+                            <td style="text-align: left;">{{ stats.text }}</td>
+                            <td>{{ stats.by_relationship.self|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.supervisor|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.teacher|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.peer|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.parent|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.student|default:"--" }}</td>
+                            <td>{{ stats.average }}</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <tr class="category-header">
+                        <td colspan="8">School Improvement (Continuous improvement)</td>
+                    </tr>
+                    {% for q_num, stats in question_stats.items %}
+                        {% if q_num >= 43 and q_num <= 45 %}
+                        <tr>
+                            <td style="text-align: left;">{{ stats.text }}</td>
+                            <td>{{ stats.by_relationship.self|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.supervisor|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.teacher|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.peer|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.parent|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.student|default:"--" }}</td>
+                            <td>{{ stats.average }}</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <tr class="category-header">
+                        <td colspan="8">Pedagogy (Assessments, data use)</td>
+                    </tr>
+                    {% for q_num, stats in question_stats.items %}
+                        {% if q_num >= 46 and q_num <= 48 %}
+                        <tr>
+                            <td style="text-align: left;">{{ stats.text }}</td>
+                            <td>{{ stats.by_relationship.self|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.supervisor|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.teacher|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.peer|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.parent|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.student|default:"--" }}</td>
+                            <td>{{ stats.average }}</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <tr class="category-header">
+                        <td colspan="8">Operations (HR, resource management, finance)</td>
+                    </tr>
+                    {% for q_num, stats in question_stats.items %}
+                        {% if q_num >= 49 and q_num <= 52 %}
+                        <tr>
+                            <td style="text-align: left;">{{ stats.text }}</td>
+                            <td>{{ stats.by_relationship.self|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.supervisor|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.teacher|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.peer|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.parent|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.student|default:"--" }}</td>
+                            <td>{{ stats.average }}</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <tr class="category-header">
+                        <td colspan="8">Life-Long Learner (Technology, growth and development)</td>
+                    </tr>
+                    {% for q_num, stats in question_stats.items %}
+                        {% if q_num >= 53 and q_num <= 55 %}
+                        <tr>
+                            <td style="text-align: left;">{{ stats.text }}</td>
+                            <td>{{ stats.by_relationship.self|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.supervisor|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.teacher|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.peer|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.parent|default:"--" }}</td>
+                            <td>{{ stats.by_relationship.student|default:"--" }}</td>
+                            <td>{{ stats.average }}</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <div class="page-number">12</div>
+        </div>
+        
+        <!-- Page 13: Comments -->
+        <div class="content-page">
+            <div class="page-header">{{ survey.leader_name }}</div>
+            
+            <div class="section-header">Comments</div>
+            
+            <div class="comments-section">
+                <h4>Describe a positive behavior, action, or practice that this leader demonstrates that they should continue to do.</h4>
+                {% for response in continue_responses|unique %}
+                <div class="comment-item">• {{ response }}</div>
+                {% endfor %}
+                
+                <h4>Describe a behavior, action, or practice this leader should stop doing because it may hinder their leadership impact.</h4>
+                {% for response in stop_responses|unique %}
+                <div class="comment-item">• {{ response }}</div>
+                {% endfor %}
+                
+                <h4>Describe a behavior, action, or leadership practice you believe this leader should start doing to improve their leadership impact.</h4>
+                {% for response in start_responses|unique %}
+                <div class="comment-item">• {{ response }}</div>
+                {% endfor %}
+            </div>
+            
+            <div class="page-number">13</div>
+        </div>
+        
+        <!-- Page 14: Action Planning -->
+        <div class="content-page">
+            <div class="page-header">{{ survey.leader_name }}</div>
+            
+            <h3>Principal360 Action Planning</h3>
+            
+            <p><strong>Purpose:</strong> To support individual growth and leadership development by translating the Principal360° feedback into clear, actionable steps.</p>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <strong>Client Name:</strong> ________________
+                </div>
+                <div class="col-md-6">
+                    <strong>Date of plan Creation:</strong> ________________
+                </div>
+            </div>
+            
+            <div style="margin: 20px 0;">
+                <strong>Development Goal:</strong><br>
+                <div style="height: 60px; border-bottom: 1px solid #333; margin: 5px 0;"></div>
+                <div style="height: 60px; border-bottom: 1px solid #333; margin: 5px 0;"></div>
+            </div>
+            
+            <div style="margin: 20px 0;">
+                <strong>Desired Outcomes:</strong> (What will success look like? What shifts in behavior, perception, or performance are expected?):<br>
+                <div style="height: 80px; border-bottom: 1px solid #333; margin: 5px 0;"></div>
+                <div style="height: 80px; border-bottom: 1px solid #333; margin: 5px 0;"></div>
+            </div>
+            
+            <div style="margin: 20px 0;">
+                <strong>Evidence of Progress</strong> (What indicators or benchmarks will show that progress is being made? How will behavior changes be tracked or observed (e.g., journaling, feedback loops, self-assessments, etc.))<br>
+                <div style="height: 80px; border-bottom: 1px solid #333; margin: 5px 0;"></div>
+                <div style="height: 80px; border-bottom: 1px solid #333; margin: 5px 0;"></div>
+            </div>
+            
+            <div style="margin: 20px 0;">
+                <strong>Evaluation and Reflection</strong> (How and when will we assess whether the development goal has been achieved? What data or feedback will be collected (e.g., follow-up 360, stakeholder interviews, performance data)<br>
+                <div style="height: 80px; border-bottom: 1px solid #333; margin: 5px 0;"></div>
+                <div style="height: 80px; border-bottom: 1px solid #333; margin: 5px 0;"></div>
+            </div>
+            
+            <div class="page-number">14</div>
+        </div>
+        
+        <!-- Page 15: Final Action Planning Table -->
+        <div class="content-page">
+            <div class="page-header">{{ survey.leader_name }}</div>
+            
+            <table class="action-planning-table">
+                <thead>
+                    <tr>
+                        <th>Process</th>
+                        <th>Action</th>
+                        <th>Owner<br>(Client/Coach/Other)</th>
+                        <th>Time<br>By When?<br>(Day/Month)</th>
+                        <th>Resources</th>
+                        <th>Derailers & Mitigation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Step 1:</td>
+                        <td style="height: 40px;"></td>
+                        <td style="height: 40px;"></td>
+                        <td style="height: 40px;"></td>
+                        <td style="height: 40px;"></td>
+                        <td style="height: 40px;"></td>
+                    </tr>
+                    <tr>
+                        <td>Step 2:</td>
+                        <td style="height: 40px;"></td>
+                        <td style="height: 40px;"></td>
+                        <td style="height: 40px;"></td>
+                        <td style="height: 40px;"></td>
+                        <td style="height: 40px;"></td>
+                    </tr>
+                    <tr>
+                        <td>Step 3:</td>
+                        <td style="height: 40px;"></td>
+                        <td style="height: 40px;"></td>
+                        <td style="height: 40px;"></td>
+                        <td style="height: 40px;"></td>
+                        <td style="height: 40px;"></td>
+                    </tr>
+                    <tr>
+                        <td>Step 4:</td>
+                        <td style="height: 40px;"></td>
+                        <td style="height: 40px;"></td>
+                        <td style="height: 40px;"></td>
+                        <td style="height: 40px;"></td>
+                        <td style="height: 40px;"></td>
+                    </tr>
+                    <tr>
+                        <td>Step 5:</td>
+                        <td style="height: 40px;"></td>
+                        <td style="height: 40px;"></td>
+                        <td style="height: 40px;"></td>
+                        <td style="height: 40px;"></td>
+                        <td style="height: 40px;"></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div style="margin-top: 20px;">
+                <strong>Notes / Reflections (Optional)</strong> Insights, observations, or things to revisit in future coaching sessions.<br>
+                <div style="height: 100px; border: 1px solid #333; margin: 10px 0;"></div>
+            </div>
+            
+            <div class="page-number">15</div>
+        </div>
+    </div>
+    
+    <script>
+        // Participant Distribution Pie Chart
+        const participantCtx = document.getElementById('participantChart').getContext('2d');
+        new Chart(participantCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Supervisor/Manager', 'Peer/Same Level Colleague', 'Teacher/Staff', 'I am a student', 'Parent/Community Representative/Business Representative', 'Self/This is my survey'],
+                datasets: [{
+                    data: [{{ supervisors_count|default:0 }}, {{ peers_count|default:0 }}, {{ staff_count|default:0 }}, {{ students_count|default:0 }}, {{ community_count|default:0 }}, 1],
+                    backgroundColor: ['#2E86AB', '#A23B72', '#F18F01', '#C73E1D', '#8E44AD', '#16A085']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            boxWidth: 12,
+                            padding: 8,
+                            font: {
+                                size: 10
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

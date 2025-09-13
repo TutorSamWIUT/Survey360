@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Principal360 Admin{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block nav_items %}
+<li class="nav-item">
+    <a class="nav-link active" href="{% url 'admin_dashboard' %}">
+        <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'survey_list' %}">
+        <i class="fas fa-list me-2"></i> Surveys
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'create_survey' %}">
+        <i class="fas fa-plus-circle me-2"></i> New Survey
+    </a>
+</li>
+{% endblock %}
+
+{% block header_actions %}
+<span class="text-muted">Welcome, {{ user.first_name|default:user.username }}!</span>
+{% endblock %}
+
+{% block content %}
+<div>
+    
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Total Surveys</h6>
+                            <h2 class="mb-0">{{ total_surveys }}</h2>
+                        </div>
+                        <i class="fas fa-clipboard-list fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Active Surveys</h6>
+                            <h2 class="mb-0">{{ active_surveys }}</h2>
+                        </div>
+                        <i class="fas fa-chart-line fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Completed</h6>
+                            <h2 class="mb-0">{{ completed_surveys }}</h2>
+                        </div>
+                        <i class="fas fa-check-circle fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Pending Self</h6>
+                            <h2 class="mb-0">{{ pending_self_assessment|length }}</h2>
+                        </div>
+                        <i class="fas fa-hourglass-half fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-bolt me-2"></i> Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'create_survey' %}" class="btn btn-primary me-2">
+                        <i class="fas fa-plus-circle me-2"></i> Create New Survey
+                    </a>
+                    <a href="{% url 'survey_list' %}" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-list me-2"></i> View All Surveys
+                    </a>
+                    <a href="{% url 'survey_list' %}?status=pending" class="btn btn-outline-warning">
+                        <i class="fas fa-clock me-2"></i> Pending Assessments
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Recent Surveys -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-history me-2"></i> Recent Surveys</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_surveys %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Leader</th>
+                                    <th>Created</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for survey in recent_surveys %}
+                                <tr>
+                                    <td>{{ survey.leader_name }}</td>
+                                    <td>{{ survey.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        {% if survey.leader_completed_self %}
+                                        <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                        <span class="badge bg-warning">Pending Self</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'survey_detail' survey.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No surveys created yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pending Self-Assessments -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-user-clock me-2"></i> Pending Self-Assessments</h5>
+                </div>
+                <div class="card-body">
+                    {% if pending_self_assessment %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Leader</th>
+                                    <th>Email</th>
+                                    <th>Days Ago</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for survey in pending_self_assessment %}
+                                <tr>
+                                    <td>{{ survey.leader_name }}</td>
+                                    <td>{{ survey.leader_email }}</td>
+                                    <td>{{ survey.created_at|timesince }} ago</td>
+                                    <td>
+                                        <a href="{% url 'survey_detail' survey.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">All leaders have completed their self-assessments.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

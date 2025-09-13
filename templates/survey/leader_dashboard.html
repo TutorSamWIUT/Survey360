@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leader Dashboard - {{ survey.leader_name }}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .dashboard-container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .dashboard-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .dashboard-content {
+            padding: 30px;
+        }
+        
+        .success-badge {
+            background: #28a745;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        
+        .invitation-form {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .invitation-status {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .status-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1><i class="fas fa-user-tie me-2"></i>Leadership Assessment</h1>
+            <h2>{{ survey.leader_name }}</h2>
+            <div class="success-badge">
+                <i class="fas fa-check-circle me-2"></i>Self-Assessment Complete
+            </div>
+        </div>
+        
+        <div class="dashboard-content">
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Great work!</strong> You've completed your self-assessment. Now you can invite others to provide feedback.
+            </div>
+            
+            <div class="invitation-form">
+                <h4><i class="fas fa-paper-plane me-2"></i>Invite Participants</h4>
+                <p class="text-muted">Send survey invitations to colleagues, supervisors, students, and community members.</p>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.emails.id_for_label }}" class="form-label">
+                            <strong>Participant Email Addresses</strong>
+                        </label>
+                        {{ form.emails }}
+                        {% if form.emails.errors %}
+                        <div class="text-danger mt-1">{{ form.emails.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">{{ form.emails.help_text }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.expires_at.id_for_label }}" class="form-label">
+                            <strong>Survey Expiration Date</strong>
+                        </label>
+                        {{ form.expires_at }}
+                        {% if form.expires_at.errors %}
+                        <div class="text-danger mt-1">{{ form.expires_at.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">{{ form.expires_at.help_text }}</div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-paper-plane me-2"></i>Send Invitations
+                    </button>
+                </form>
+            </div>
+            
+            {% if invitations %}
+            <div class="invitation-status">
+                <h4><i class="fas fa-list me-2"></i>Invitation Status</h4>
+                <p class="text-muted">Track who has completed the survey.</p>
+                
+                {% for invitation in invitations %}
+                <div class="status-item">
+                    <div>
+                        <strong>{{ invitation.email }}</strong><br>
+                        <small class="text-muted">
+                            Sent: {{ invitation.sent_at|date:"M d, Y" }} | 
+                            Expires: {{ invitation.expires_at|date:"M d, Y" }}
+                        </small>
+                    </div>
+                    <div>
+                        {% if invitation.used %}
+                        <span class="badge bg-success">
+                            <i class="fas fa-check me-1"></i>Completed
+                        </span>
+                        {% elif invitation.is_expired %}
+                        <span class="badge bg-danger">
+                            <i class="fas fa-times me-1"></i>Expired
+                        </span>
+                        {% else %}
+                        <span class="badge bg-warning">
+                            <i class="fas fa-clock me-1"></i>Pending
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="alert alert-info mt-4">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>What happens next?</strong><br>
+                Once participants complete their surveys, an administrator will generate your comprehensive leadership report and send it to you via email.
+            </div>
+            
+            <div class="text-center mt-4">
+                <p class="text-muted">
+                    Questions? Contact your survey administrator.<br>
+                    <strong>Survey ID:</strong> #{{ survey.id }}
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
